@@ -1,30 +1,37 @@
 import React from 'react';
+import { useField } from 'formik';
+import merge from 'clsx';
 
-interface IInputProps {
+type IInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  name: string;
   label: string;
-  inputType?: string;
+  type?: string;
   placeholder?: string;
-  value: string | number | undefined;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}
+};
 
-const Input: React.FC<IInputProps> = ({
-  label,
-  inputType = 'text',
-  placeholder = `Enter ${label}`,
-  value,
-  onChange,
-}) => {
+const Input: React.FC<IInputProps> = ({ label, ...props }) => {
+  const [field, { error }] = useField(props);
+  const { type = 'text', placeholder = `Enter ${label}` } = props;
+
   return (
     <div className="w-full flex flex-col">
-      <label className="mb-2">{label}</label>
+      <label className="mb-2" htmlFor={field.name}>
+        {label}
+      </label>
       <input
+        {...field}
+        {...props}
+        id={field.name}
         placeholder={placeholder}
-        className="h-8 border-b-2 focus:outline-none focus:border-gray-400 border-gray-200"
-        type={inputType}
-        value={value}
-        onChange={onChange}
+        className={merge(
+          'h-8 border-b-2 focus:outline-none focus:border-gray-400 border-gray-200',
+          error && 'border-red-600'
+        )}
+        type={type}
       />
+      {error && (
+        <p className="text-red-600 font-semibold text-xs">error here</p>
+      )}
     </div>
   );
 };
