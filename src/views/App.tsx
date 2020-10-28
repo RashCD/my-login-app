@@ -1,22 +1,41 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { Form, Formik } from 'formik';
-import Card from './components/Card';
-import Input from './components/Input';
-import LoadingAnimation from './components/LoadingAnimation';
+import Card from '../components/Card';
+import Input from '../components/Input';
+import LoadingAnimation from '../components/LoadingAnimation';
+import { LoginSchema } from '../schema/LoginSchema';
+import Layout from '../components/Layout';
+import { Link, useHistory } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+
+const initialValues = { userId: '', userPassword: '' };
 
 function App() {
-  const onSubmitForm = () => {
-    return new Promise((resolve) => setTimeout(resolve, 3000));
+  const context = useContext(AuthContext);
+  const [formFail, setFormFail] = useState('');
+  const history = useHistory();
+
+  const onSubmitForm = async (values: typeof initialValues) => {
+    try {
+      const response = await context?.loginUser({
+        userId: values.userId,
+        password: values.userPassword,
+      });
+      history.push(`/user/${response.userId}`);
+    } catch (err) {
+      setFormFail(err.message);
+    }
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-bl from-teal-300 via-white to-gray-500">
+    <Layout>
       <div className="flex w-full h-full justify-center items-center">
         <div className="w-10/12" style={{ maxWidth: 400 }}>
           <Card className="relative">
             <Formik
-              initialValues={{ userId: '', userPassword: '' }}
+              initialValues={initialValues}
               onSubmit={onSubmitForm}
+              validationSchema={LoginSchema}
             >
               {({ isSubmitting }) => (
                 <Form>
@@ -31,6 +50,11 @@ function App() {
                       label="Password"
                       type="password"
                     />
+                    {formFail && (
+                      <p className="text-red-600 font-semibold text-xs text-center pt-5">
+                        {formFail}
+                      </p>
+                    )}
                     <div className="pb-24" />
                   </div>
                   <button
@@ -45,13 +69,13 @@ function App() {
             </Formik>
           </Card>
           <div className="mt-4 flex justify-center">
-            <a href="/" className="text-blue-700 underline">
+            <Link to="/reset-password" className="text-blue-700 underline">
               Forgot Password ?
-            </a>
+            </Link>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 

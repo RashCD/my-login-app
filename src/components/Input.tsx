@@ -1,5 +1,5 @@
 import React from 'react';
-import { useField } from 'formik';
+import { ErrorMessage, useField } from 'formik';
 import merge from 'clsx';
 
 type IInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -10,7 +10,7 @@ type IInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 const Input: React.FC<IInputProps> = ({ label, ...props }) => {
-  const [field, { error }] = useField(props);
+  const [field, { error, touched }] = useField(props);
   const { type = 'text', placeholder = `Enter ${label}` } = props;
 
   return (
@@ -24,14 +24,14 @@ const Input: React.FC<IInputProps> = ({ label, ...props }) => {
         id={field.name}
         placeholder={placeholder}
         className={merge(
-          'h-8 border-b-2 focus:outline-none focus:border-gray-400 border-gray-200',
-          error && 'border-red-600'
+          'h-8 border-b-2 focus:outline-none focus:border-gray-700 border-gray-200',
+          error && touched && 'border-red-600'
         )}
         type={type}
       />
-      {error && (
-        <p className="text-red-600 font-semibold text-xs">error here</p>
-      )}
+      <ErrorMessage name={field.name}>
+        {(msg) => <p className="text-red-600 font-semibold text-xs">{msg}</p>}
+      </ErrorMessage>
     </div>
   );
 };
